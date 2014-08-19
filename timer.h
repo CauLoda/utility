@@ -8,7 +8,10 @@
 #define UTILITY_TIMER_H_
 
 #include "uncopyable.h"
+#ifdef WIN32
 #include <Windows.h>
+#else
+#endif
 
 namespace utility {
 
@@ -23,7 +26,11 @@ class Timer : public Uncopyable {
   void Uninit();
 
  private:
+#ifdef WIN32
   HANDLE timer_;
+#else
+  int timer_;
+#endif
   int period_;
 };
 

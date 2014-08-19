@@ -1,6 +1,11 @@
 #include "utility_net.h"
-#include <sstream>
 #include <vector>
+#ifdef WIN32
+#include <Ws2tcpip.h>
+#else
+#include "utility.h"
+#include <arpa/inet.h>
+#endif
 
 namespace utility {
 
@@ -9,10 +14,9 @@ std::string ConvertIP(unsigned long ip) {
   for (auto i = 0; i < 4; ++i) {
     item[i] = ((ip >> (i * 8)) & 0xFF);
   }
-  std::stringstream ip_stream;
-  ip_stream << item[3] << "." << item[2] << "." << item[1] << "." << item[0];
-  auto& string_ip = ip_stream.str();
-  return std::move(string_ip);
+  char ip_str[16] = {0};
+  sprintf_s(ip_str, _countof(ip_str), "%d.%d.%d.%d", item[3], item[2], item[1], item[0]);
+  return ip_str;
 }
 
 unsigned long ConvertIP(const std::string& ip) {
@@ -37,14 +41,15 @@ unsigned long ConvertIP(const std::string& ip) {
   return int_ip;
 }
 
-void ToSockAddr(const std::string& ip, int port, SOCKADDR_IN& addr) {
+void ToSockAddr(const std::string& ip, int port, sockaddr_in& addr) {
   addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = inet_addr(ip.c_str());
+  inet_pton(AF_INET, ip.c_str(), &addr.sin_addr.s_addr);
   addr.sin_port = htons(static_cast<u_short>(port));
 }
 
-void FromSockAddr(const SOCKADDR_IN& addr, std::string& ip, int& port) {
-  ip = inet_ntoa(addr.sin_addr);
+void FromSockAddr(const sockaddr_in& addr, std::string& ip, int& port) {
+  char ip_str[16] = {0};
+  ip = inet_ntop(AF_INET, (void*)&addr.sin_addr, ip_str, _countof(ip_str));
   port = ntohs(addr.sin_port);
 }
 

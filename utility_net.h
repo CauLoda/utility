@@ -8,7 +8,11 @@
 #define UTILITY_UTILITY_NET_H_
 
 #include <string>
+#ifdef WIN32
 #include <WinSock2.h>
+#else
+#include <netinet/in.h>
+#endif
 
 namespace utility {
 
@@ -19,10 +23,10 @@ std::string ConvertIP(unsigned long ip);
 unsigned long ConvertIP(const std::string& ip);
 
 // Convert socket address
-void ToSockAddr(const std::string& ip, int port, SOCKADDR_IN& addr);
+void ToSockAddr(const std::string& ip, int port, sockaddr_in& addr);
 
 // Convert socket address
-void FromSockAddr(const SOCKADDR_IN& addr, std::string& ip, int& port);
+void FromSockAddr(const sockaddr_in& addr, std::string& ip, int& port);
 
 } // namespace utility
 
