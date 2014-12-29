@@ -47,7 +47,7 @@ bool Timer::Init(int period) {
 
 #ifdef WIN32
 bool Timer::ResetTimer(int period) {
-  if (period <= 0 || timer_ == INVALID_TIMER) {
+  if (period < 0 || timer_ == INVALID_TIMER) {
     return false;
   }
   period_ = period;
@@ -61,7 +61,7 @@ bool Timer::ResetTimer(int period) {
 }
 #else
 bool Timer::ResetTimer(int period) {
-  if (period <= 0 || timer_ == INVALID_TIMER) {
+  if (period < 0 || timer_ == INVALID_TIMER) {
     return false;
   }
   period_ = period;
@@ -96,6 +96,7 @@ bool Timer::Wait() {
 
 void Timer::Uninit() {
   if (timer_ != INVALID_TIMER) {
+    ResetTimer(0);
 #ifdef WIN32
     CloseHandle(timer_);
 #else

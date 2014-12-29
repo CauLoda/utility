@@ -1,10 +1,8 @@
 #include "utility_net.h"
 #include <vector>
 #ifdef WIN32
-#include <Ws2tcpip.h>
 #else
 #include "utility.h"
-#include <arpa/inet.h>
 #endif
 
 namespace utility {
@@ -43,13 +41,12 @@ unsigned long ConvertIP(const std::string& ip) {
 
 void ToSockAddr(const std::string& ip, int port, sockaddr_in& addr) {
   addr.sin_family = AF_INET;
-  inet_pton(AF_INET, ip.c_str(), &addr.sin_addr.s_addr);
+  addr.sin_addr.s_addr = htonl(ConvertIP(ip));
   addr.sin_port = htons(static_cast<u_short>(port));
 }
 
 void FromSockAddr(const sockaddr_in& addr, std::string& ip, int& port) {
-  char ip_str[16] = {0};
-  ip = inet_ntop(AF_INET, (void*)&addr.sin_addr, ip_str, _countof(ip_str));
+  ip = ConvertIP(ntohl(addr.sin_addr.s_addr));
   port = ntohs(addr.sin_port);
 }
 

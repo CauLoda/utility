@@ -197,8 +197,7 @@ bool Logger::InitClear() {
 
 bool Logger::LoopClear() {
   auto first_clear = true;
-  while (true) {
-    clear_timer_.Wait();
+  while (clear_timer_.Wait()) {
     if (first_clear) {
       const auto one_day_seconds = 24 * 60 * 60;
       clear_timer_.ResetTimer(one_day_seconds);
@@ -222,7 +221,7 @@ bool Logger::ClearOldLog() {
   std::wstring log_dir(file_pre_path_, 0, ++last_slash_pos);
   do {
     auto find_file = log_dir + find_data.cFileName;
-    std::for_each(find_file.begin(), find_file.end(), towlower);
+    std::transform(find_file.begin(), find_file.end(), find_file.begin(), towlower);
     all_log_file.push_back(std::move(find_file));
   } while (FindNextFile(find_handler, &find_data));
   FindClose(find_handler);
@@ -232,7 +231,7 @@ bool Logger::ClearOldLog() {
   wchar_t base[1024] = {0};
   swprintf_s(base, _countof(base), L"%s%04u%02u%02u.log", file_pre_path_.c_str(), past.year, past.month, past.day);
   std::wstring delete_base(base);
-  std::for_each(delete_base.begin(), delete_base.end(), towlower);
+  std::transform(delete_base.begin(), delete_base.end(), delete_base.begin(), towlower);
   for (const auto& i : all_log_file) {
     if (i < delete_base) {
       DeleteFile(i.c_str());
@@ -256,7 +255,7 @@ bool Logger::ClearOldLog() {
     if (find_ext == std::string::npos) {
       continue;
     }
-    std::for_each(find_file.begin(), find_file.end(), towlower);
+    std::transform(find_file.begin(), find_file.end(), find_file.begin(), towlower);
     all_log_file.push_back(std::move(find_file));
   }
   closedir(dir);
@@ -266,7 +265,7 @@ bool Logger::ClearOldLog() {
   char base[1024] = {0};
   sprintf_s(base, _countof(base), "%s%04u%02u%02u.log", file_pre_path_.c_str(), past.year, past.month, past.day);
   std::string delete_base(base);
-  std::for_each(delete_base.begin(), delete_base.end(), towlower);
+  std::transform(delete_base.begin(), delete_base.end(), delete_base.begin(), towlower);
   for (const auto& i : all_log_file) {
     if (i < delete_base) {
       unlink(i.c_str());

@@ -9,7 +9,7 @@
 
 #include "uncopyable.h"
 #include <mutex>
-#include <unordered_set>
+#include <set>
 #include <vector>
 
 namespace utility {
@@ -29,7 +29,7 @@ class Indexer : public Uncopyable {
 
  private:
   unsigned long index_count_;
-  std::unordered_set<Index> index_pool_;
+  std::set<Index> index_pool_;
   std::mutex index_pool_lock;
 };
 

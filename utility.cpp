@@ -16,16 +16,13 @@ std::wstring AStringToW(const std::string& a_string, bool utf8) {
   if (a_string.empty()) {
     return L"";
   }
-  std::unique_ptr<wchar_t[]> w_string;
+  auto code_page = CP_ACP;
   if (utf8) {
-    auto string_size = MultiByteToWideChar(CP_UTF8, 0, a_string.c_str(), -1, NULL, 0);
-    w_string.reset(new wchar_t[string_size]);
-    MultiByteToWideChar(CP_UTF8, 0, a_string.c_str(), -1, w_string.get(), string_size);
-  } else {
-    auto string_size = MultiByteToWideChar(CP_ACP, 0, a_string.c_str(), -1, NULL, 0);
-    w_string.reset(new wchar_t[string_size]);
-    MultiByteToWideChar(CP_ACP, 0, a_string.c_str(), -1, w_string.get(), string_size);
+    code_page = CP_UTF8;
   }
+  auto string_size = MultiByteToWideChar(CP_UTF8, 0, a_string.c_str(), -1, NULL, 0);
+  auto w_string = std::make_unique<wchar_t[]>(string_size);
+  MultiByteToWideChar(code_page, 0, a_string.c_str(), -1, w_string.get(), string_size);
   return w_string.get();
 }
 #else
@@ -35,7 +32,7 @@ std::wstring AStringToW(const std::string& a_string, bool utf8) {
   }
   auto string_size = mbstowcs(nullptr, a_string.c_str(), 0);
   ++string_size;
-  std::unique_ptr<wchar_t[]> w_string(new wchar_t[string_size]);
+  auto w_string = std::make_unique<wchar_t[]>(string_size);
   mbstowcs(w_string.get(), a_string.c_str(), string_size);
   return w_string.get();
 }
@@ -47,7 +44,7 @@ std::string WStringToA(const std::wstring& w_string) {
     return "";
   }
   auto string_size = WideCharToMultiByte(CP_OEMCP, 0, w_string.c_str(), -1, NULL, 0, NULL, NULL);
-  std::unique_ptr<char[]> a_string(new char[string_size]);
+  auto a_string = std::make_unique<char[]>(string_size);
   WideCharToMultiByte(CP_OEMCP, 0, w_string.c_str(), -1, a_string.get(), string_size, NULL, NULL);
   return a_string.get();
 }
@@ -58,7 +55,7 @@ std::string WStringToA(const std::wstring& w_string) {
 }
   auto string_size = wcstombs(nullptr, w_string.c_str(), 0);
   ++string_size;
-  std::unique_ptr<char[]> a_string(new char[string_size]);
+  auto a_string = std::make_unique<char[]>(string_size);
   wcstombs(a_string.get(), w_string.c_str(), string_size);
   return a_string.get();
 }
